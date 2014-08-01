@@ -1,0 +1,22 @@
+{
+  "name": "emmy",
+  "version": "0.0.1",
+  "description": "An evolved event emitter library",
+  "main": "events.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Ricardo Tomasi <ricardobeat@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "backbone": "^1.1.2",
+    "coffee-script": "^1.7.1",
+    "mocha": "^1.21.3",
+    "should": "^4.0.4",
+    "queue-async": "^1.0.7",
+    "easy-table": "^0.3.0"
+  }
+}
