@@ -1,0 +1,18 @@
+{
+    "curly"         : false,
+    "immed"         : false,
+    "newcap"        : true,
+    "asi"           : true,
+    "boss"          : true,
+    "expr"          : true,
+    "debug"         : true,
+    "eqnull"        : true,
+    "es5"           : true,
+    "esnext"        : true,
+    "laxbreak"      : true,
+    "laxcomma"      : true,
+    "validthis"     : true,
+    "browser"       : true,
+    "node"          : true,
+    "-W058"         : true // invoke constructor without parenthesis - (+new Date)
+}
