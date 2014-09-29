@@ -48,7 +48,7 @@
     
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = EventChannel
-    } else if (typeof define !== 'undefined') {
+    } else if (typeof define === 'function') {
         define('EventChannel', function () { return EventChannel })
     } else {
         this.EventChannel = EventChannel
