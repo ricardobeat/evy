@@ -150,7 +150,8 @@ by all the methods that manipulate events.</p>
         
       
         
-        <p>The <strong>addListener</strong> method adds a handler to the events list.</p>
+        <h4 id="-addlistener">.addListener</h4>
+<p>Adds a handler to the events list.</p>
 
         
           <div class='highlight'><pre>    EventEmitter.prototype.addListener = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(name, fn, context)</span> </span>{
@@ -165,8 +166,8 @@ by all the methods that manipulate events.</p>
         
       
         
-        <p>The <strong>once</strong> method adds a handler that will only get called once, by
-removing itself after the first call.</p>
+        <h4 id="-once">.once</h4>
+<p>Adds a handler that will only get called once, by removing itself after the first call.</p>
 
         
           <div class='highlight'><pre>    EventEmitter.prototype.once = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(name, fn)</span> </span>{
@@ -185,7 +186,8 @@ removing itself after the first call.</p>
         
       
         
-        <p>The <strong>removeListener</strong> method removes an event handler from the events list.</p>
+        <h4 id="-removelistener">.removeListener</h4>
+<p>Removes an event handler from the events list.</p>
 
         
           <div class='highlight'><pre>    EventEmitter.prototype.removeListener = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(name, fn, context)</span> </span>{
@@ -240,21 +242,8 @@ removing itself after the first call.</p>
         
       
         
-        <p><strong>emitNext</strong> schedules an event to the next tick, using the methods
-available in the environment. Useful when an emitter fires events
-straight after creation, without giving listeners a chance to be setup.</p>
-
-        
-          <div class='highlight'><pre>    EventEmitter.prototype.emitNext = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(name)</span> </span>{
-        <span class="hljs-keyword">this</span>._strict &amp;&amp; validateEvent(<span class="hljs-keyword">this</span>, <span class="hljs-string">'emitNext'</span>, name)
-        <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>, args = <span class="hljs-built_in">arguments</span>
-        <span class="hljs-keyword">var</span> run = _bind(EventEmitter.prototype.emit, self, args)
-        <span class="hljs-keyword">return</span> _hasImmediate ? setImmediate(run) : setTimeout(run, <span class="hljs-number">0</span>)
-    }</pre></div>
-        
-      
-        
-        <p>The <strong>emit</strong> method calls all handlers that match the given event type.</p>
+        <h4 id="-emit">.emit</h4>
+<p>The <code>emit</code> method calls all handlers that match the given event type.</p>
 
         
           <div class='highlight'><pre>    EventEmitter.prototype.emit = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(name)</span> </span>{
@@ -283,6 +272,21 @@ straight after creation, without giving listeners a chance to be setup.</p>
         
       
         
+        <h4 id="-emitnext">.emitNext</h4>
+<p>Schedules an event to the next tick, using the methods
+available in the environment. Useful when an emitter fires events
+straight after creation, without giving listeners a chance to be setup.</p>
+
+        
+          <div class='highlight'><pre>    EventEmitter.prototype.emitNext = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(name)</span> </span>{
+        <span class="hljs-keyword">this</span>._strict &amp;&amp; validateEvent(<span class="hljs-keyword">this</span>, <span class="hljs-string">'emitNext'</span>, name)
+        <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>, args = <span class="hljs-built_in">arguments</span>
+        <span class="hljs-keyword">var</span> run = _bind(EventEmitter.prototype.emit, self, args)
+        <span class="hljs-keyword">return</span> _hasImmediate ? setImmediate(run) : setTimeout(run, <span class="hljs-number">0</span>)
+    }</pre></div>
+        
+      
+        
         <p>The <code>tick</code> method is here for debugging purposes. It keeps count of emitted events over time
 and calculates a running average rate for the past 2 seconds. Mostly useful for finding 
 accidental loops and optimizing code.
@@ -301,7 +305,8 @@ accidental loops and optimizing code.
         
       
         
-        <p>The <strong>proxy</strong> method returns a function that emits $name event on the emitter that
+        <h4 id="-proxy">.proxy</h4>
+<p>The <code>proxy</code> method returns a function that emits $name event on the emitter that
 created it. It also accepts a <code>transform</code> function that will be called on the event
 data before being forwarded. Use (with caution) to create event chains / pipes.</p>
 
@@ -320,7 +325,8 @@ data before being forwarded. Use (with caution) to create event chains / pipes.<
         
       
         
-        <p>The <strong>listenTo</strong> method attaches listeners to another object,
+        <h4 id="-listento">.listenTo</h4>
+<p>The <code>listenTo</code> method attaches listeners to another object,
 while keeping track of them for easy clean-up. The gist of the implementation
 is handled by the <code>RemoteListener</code> objects.</p>
 
@@ -333,7 +339,8 @@ is handled by the <code>RemoteListener</code> objects.</p>
         
       
         
-        <p><strong>listenToOne</strong> is the same as above but with “once” behaviour, removing itself
+        <h4 id="-listentoone">.listenToOne</h4>
+<p><code>listenToOne</code> is the same as above but with “once” behaviour, removing itself
 after the first call.</p>
 
         
@@ -351,7 +358,8 @@ after the first call.</p>
         
       
         
-        <p>The <strong>stopListening</strong> method removes all remote listeners.</p>
+        <h4 id="-stoplistening">.stopListening</h4>
+<p>Removes all remote listeners.</p>
 
         
           <div class='highlight'><pre>    EventEmitter.prototype.stopListening = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(target, name, fn)</span> </span>{
@@ -364,7 +372,8 @@ after the first call.</p>
         
       
         
-        <p>The <strong>destroy</strong> method is a shortcut for easily removing all local <em>and</em> remote listeners.</p>
+        <h4 id="-destroy">.destroy</h4>
+<p>A shortcut for easily removing all local <em>and</em> remote listeners.</p>
 
         
           <div class='highlight'><pre>    EventEmitter.prototype.destroy = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
@@ -439,7 +448,8 @@ another emitter, forwarding method calls and arguments.</p>
         
       
         
-        <p>Standard <strong>extend</strong> method, copies all properties and methods to target object.
+        <h4 id="eventemitter-extend">EventEmitter.extend</h4>
+<p>Copies all properties and methods to target object.
 For use when creating a new emitter instance, or prototypal inheritance, is undesired. </p>
 
         
@@ -455,8 +465,8 @@ For use when creating a new emitter instance, or prototypal inheritance, is unde
         
       
         
-        <p><strong>EventEmitter.create</strong> is a shortcut to create a new emitter without the <code>new</code> keyword.
- Makes some people very happy.</p>
+        <h4 id="eventemitter-create">EventEmitter.create</h4>
+<p>Creates a new emitter without the <code>new</code> keyword. Makes some people very happy.</p>
 
         
           <div class='highlight'><pre>    EventEmitter.create = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(options)</span> </span>{

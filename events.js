@@ -93,7 +93,8 @@
     //     })
     //
 
-    // The **addListener** method adds a handler to the events list.
+    // #### .addListener
+    // Adds a handler to the events list.
     EventEmitter.prototype.addListener = function (name, fn, context) {
         this._strict && validateEvent(this, 'addListener', name)
         var handlers = this._events[name] || (this._events[name] = [])
@@ -104,8 +105,8 @@
         return this
     }
 
-    // The **once** method adds a handler that will only get called once, by
-    // removing itself after the first call.
+    // #### .once
+    // Adds a handler that will only get called once, by removing itself after the first call.
     EventEmitter.prototype.once = function (name, fn) {
         this._strict && validateEvent(this, 'once', name)
         var self  = this
@@ -120,7 +121,8 @@
         return this.addListener(name, onceFn)
     }
 
-    // The **removeListener** method removes an event handler from the events list.
+    // #### .removeListener
+    // Removes an event handler from the events list.
     EventEmitter.prototype.removeListener = function (name, fn, context) {
         this._strict && validateEvent(this, 'removeListener', name)
         var self     = this
@@ -155,19 +157,8 @@
         }
         return this
     }
-
-
-    // **emitNext** schedules an event to the next tick, using the methods
-    // available in the environment. Useful when an emitter fires events
-    // straight after creation, without giving listeners a chance to be setup.
-    EventEmitter.prototype.emitNext = function (name) {
-        this._strict && validateEvent(this, 'emitNext', name)
-        var self = this, args = arguments
-        var run = _bind(EventEmitter.prototype.emit, self, args)
-        return _hasImmediate ? setImmediate(run) : setTimeout(run, 0)
-    }
-
-    // The **emit** method calls all handlers that match the given event type.
+    // #### .emit
+    // The `emit` method calls all handlers that match the given event type.
     EventEmitter.prototype.emit = function (name) {
         this._strict && validateEvent(this, 'emit', name)
         var handlers = this._events[name]
@@ -192,6 +183,17 @@
         return this
     }
 
+    // #### .emitNext
+    // Schedules an event to the next tick, using the methods
+    // available in the environment. Useful when an emitter fires events
+    // straight after creation, without giving listeners a chance to be setup.
+    EventEmitter.prototype.emitNext = function (name) {
+        this._strict && validateEvent(this, 'emitNext', name)
+        var self = this, args = arguments
+        var run = _bind(EventEmitter.prototype.emit, self, args)
+        return _hasImmediate ? setImmediate(run) : setTimeout(run, 0)
+    }
+
     // The `tick` method is here for debugging purposes. It keeps count of emitted events over time
     // and calculates a running average rate for the past 2 seconds. Mostly useful for finding 
     // accidental loops and optimizing code.
@@ -206,7 +208,8 @@
         }
     }
 
-    // The **proxy** method returns a function that emits $name event on the emitter that
+    // #### .proxy
+    // The `proxy` method returns a function that emits $name event on the emitter that
     // created it. It also accepts a `transform` function that will be called on the event
     // data before being forwarded. Use (with caution) to create event chains / pipes.
     EventEmitter.prototype.proxy = function (name, transform) {
@@ -221,7 +224,8 @@
         }
     }
 
-    // The **listenTo** method attaches listeners to another object,
+    // #### .listenTo
+    // The `listenTo` method attaches listeners to another object,
     // while keeping track of them for easy clean-up. The gist of the implementation
     // is handled by the `RemoteListener` objects.
     EventEmitter.prototype.listenTo = function (target, name, fn, context) {
@@ -230,7 +234,8 @@
         this._listening.push(listener)
     }
 
-    // **listenToOne** is the same as above but with "once" behaviour, removing itself
+    // #### .listenToOne
+    // `listenToOne` is the same as above but with "once" behaviour, removing itself
     // after the first call.
     EventEmitter.prototype.listenToOne = function (target, name, fn, context) {
         var fired = false
@@ -244,7 +249,8 @@
         return this.listenTo(target, name, onceFn, context)
     }
 
-    // The **stopListening** method removes all remote listeners.
+    // #### .stopListening
+    // Removes all remote listeners.
     EventEmitter.prototype.stopListening = function (target, name, fn) {
         for (var i = 0, listener; listener = this._listening[i]; i++) {
             if (listener.matches(target, name, fn)) {
@@ -253,7 +259,8 @@
         }
     }
 
-    // The **destroy** method is a shortcut for easily removing all local *and* remote listeners.
+    // #### .destroy
+    // A shortcut for easily removing all local *and* remote listeners.
     EventEmitter.prototype.destroy = function () {
         this.removeListener('*')
         this.stopListening()
@@ -299,7 +306,8 @@
 
     // ### Convenience methods
 
-    // Standard **extend** method, copies all properties and methods to target object.
+    // #### EventEmitter.extend
+    // Copies all properties and methods to target object.
     // For use when creating a new emitter instance, or prototypal inheritance, is undesired. 
     EventEmitter.extend = function (target, options) {
         EventEmitter.call(target, options)
@@ -311,8 +319,8 @@
         return target
     }
 
-    // **EventEmitter.create** is a shortcut to create a new emitter without the `new` keyword.
-    //  Makes some people very happy.
+    // #### EventEmitter.create
+    // Creates a new emitter without the `new` keyword. Makes some people very happy.
     EventEmitter.create = function (options) {
         return new EventEmitter(options)
     }
