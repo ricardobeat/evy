@@ -1,113 +1,56 @@
-(function(){
+;(function(global){
 
-    var uid   = 0
-    var slice = Array.prototype.slice
     var EventEmitter
-
-    var registeredChannels = {}
 
     if (typeof require !== 'undefined') {
         EventEmitter = require('./events')
     } else {
-        EventEmitter = this.Emmy || this.EventEmitter
+        EventEmitter = global.Emmy || global.EventEmitter
     }
 
-    function _bind (fn, context, args) {
-        return function () {
-            fn.apply(context, args || arguments)
+    // Channels API
+    // ------------------------------------------------------------------------
+   
+    var api = {
+        _channels: {}
+    }
+
+    // Get channel
+    api.channel = function (name) {
+        if (!this._channels.hasOwnProperty(name)) {
+            throw new Error('Channel ' + name + ' does not exist.')
         }
+        return this._channels[name]
     }
 
-    function validateEvent (channel, method, name) {
-        if (channel.strict && !channel.events[name]) {
-            throw new Error(
-                method + "(): event '" + name + "' has not been registered for channel " + channel.name
-            )
-        }
-    }
-
-    function EventChannel (name, options) {
-        if (typeof name === 'object') {
+    // Create new channel
+    api.createChannel = function (name, options) {
+        if (typeof name !== 'string') {
             options = name
             name = options.name
         }
 
-        var options = options || {}
-
-        if (!name) {
-            throw new Error('Channel must have a name.')
+        if (this._channels.hasOwnProperty(name)) {
+            throw new Error('Channel ' + name + ' has already been defined.')
         }
 
-        if (registeredChannels[name]) {
-            throw new Error('Channel \'' + name + '\' already exists.')
-        } else {
-            registeredChannels[name] = this
-        }
+        options = options || {}
+        options.strict = true
+        options.name   = name
 
-        if (options.strict !== false && !options.events) {
-            throw new Error('Channel ' + name + ' is in strict mode but no events have been defined')
-        }
-
-        this.name    = name || options.name || (+new Date).toString(32)
-        this.emitter = new EventEmitter({ context: this })
-        this.events  = options.events || {}
-        this.strict  = options.strict === false ? false : true
+        var channel = new EventEmitter(options)
+        return this._channels[name] = channel
     }
-
-    EventChannel.prototype.subscribe = function (name, fn) {
-        validateEvent(this, 'subscribe', name)
-        this.emitter.addListener(name, fn)
-    }
-
-    EventChannel.prototype.publish = function (name, data) {
-        validateEvent(this, 'publish', name)
-        this.emitter.emit(name, data)
-    }
-    
-    EventChannel.prototype.unsubscribe = function (name, fn) {
-        validateEvent(this, 'unsubscribe', name)
-        this.emitter.removeListener(name, fn)
-    }
-
-    EventChannel.prototype.destroy = function (name) {
-        this.emitter.destroy()
-        delete registeredChannels[name]
-    }
-
-    EventChannel.create = function (name, options) {
-        return new EventChannel(name, options)
-    }
-
-    // Channel manager
-    // ------------------------------------------------------------------------
-    
-    function channel (name, options) {
-        if (options === undefined && channel.channels[name]) {
-            return channel.channels[name]
-        } else if (name && typeof options === 'object' && channel.channels[name] === undefined) {
-            var channel = new EventChannel(name, options)
-            channel.channels[name] = channel
-            return channel
-        } else if (channel.channels[name]) {
-            throw new Error('Channel ' + name + ' is already defined.')
-        } else {
-            throw new Error('Channel ' + name + ' does not exist.')
-        }
-    }
-
-    channel.channels = []
 
     // Export commonJS / global / AMD
     // ------------------------------------------------------------------------
     
-    if (typeof module !== 'undefined' && module.exports) {
-        module.exports = { EventChannel: EventChannel, channel: channel }
+    if (typeof exports !== 'undefined' && module.exports) {
+        module.exports = api
     } else if (typeof define !== 'undefined') {
-        define('channel/EventChannel', function () { return EventChannel })
-        define('channel', function () { return channel })
+        define('eventChannel', function () { return api })
     } else {
-        this.EventChannel = EventChannel
-        this.channel = channel
+        this.eventChannel = api
     }
 
-}).call(this)
+}).call(this, this)
