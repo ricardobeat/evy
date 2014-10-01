@@ -181,11 +181,16 @@
         }
     }
 
-    // Returns a function that emits a $name event
-    EventEmitter.prototype.proxy = function (name) {
+    // The **proxy** method returns a function that emits $name event on the emitter that
+    // created it. It also accepts a `transform` function that will be called on the event
+    // data before being forwarded. Use (with caution) to create event chains / pipes.
+    EventEmitter.prototype.proxy = function (name, transform) {
         var self = this
         return function () {
             var args = slice.call(arguments, 0)
+            if (typeof transform === 'function') {
+                args = transform.apply(null, args)
+            }
             args.unshift(name)
             self.emit.apply(self, args)
         }
