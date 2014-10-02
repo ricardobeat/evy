@@ -45,10 +45,10 @@
     // Export commonJS / global / AMD
     // ------------------------------------------------------------------------
     
-    if (typeof exports !== 'undefined' && module.exports) {
-        module.exports = api
-    } else if (typeof define !== 'undefined') {
-        define('eventChannel', function () { return api })
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = EventChannel
+    } else if (typeof define === 'function') {
+        define('eventChannel', function () { return EventChannel })
     } else {
         this.eventChannel = api
     }
