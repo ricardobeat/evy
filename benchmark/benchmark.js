@@ -5,6 +5,7 @@ var queue        = require('queue-async')
 var Emmy         = require('../events')
 var Backbone     = require('backbone')
 var EventEmitter = require('events').EventEmitter
+var Event_mitter = require('event-emitter')
 var _            = require('backbone/node_modules/underscore')
 
 function printResults (results) {
@@ -24,6 +25,7 @@ function testAll (testName, args, next) {
         .defer(test, results, testName, "Emmy", new Emmy, args)
         .defer(test, results, testName, "Backbone.Events", _.extend({}, Backbone.Events), args)
         .defer(test, results, testName, "node EventEmitter", new EventEmitter, args)
+        .defer(test, results, testName, "event-emitter", Event_mitter({}), args)
         .await(function(){
             printResults(results)
             next()
