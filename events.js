@@ -369,7 +369,7 @@
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = EventEmitter
     } else if (typeof define === 'function') {
-        define('EventEmitter', function () { return EventEmitter })
+        define('Emmy', function () { return EventEmitter })
     } else {
         this.Emmy = EventEmitter
     }
