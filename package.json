@@ -1,5 +1,5 @@
 {
-  "name": "emmy",
+  "name": "emmy.js",
   "version": "0.0.1",
   "description": "An evolved event emitter library",
   "main": "events.js",
@@ -20,5 +20,6 @@
     "mocha": "^1.21.3",
     "queue-async": "^1.0.7",
     "should": "^4.0.4"
-  }
+  },
+  "dependencies": {}
 }
