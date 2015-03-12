@@ -1,7 +1,7 @@
 {
-  "name": "emmy.js",
+  "name": "evy",
   "version": "0.0.2",
-  "description": "An evolved event emitter library",
+  "description": "webscale event emitter",
   "main": "events.js",
   "directories": {
     "test": "test"

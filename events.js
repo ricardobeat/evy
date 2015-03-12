@@ -1,13 +1,13 @@
 /* jshint asi:true, boss:true, expr:true, eqnull:true, -W058 */
 
-//     emmy.js
+//     evy.js
 //
 //     Version 0.1.0
 //     Ricardo Tomasi <ricardobeat@gmail.com>
 //     License: MIT (http://ricardo.mit-license.org/)
-//     http://github.com/ricardobeat/emmy
+//     http://github.com/ricardobeat/evy
 
-// Emmy is a modern EventEmitter implementation that combines
+// Evy is a modern EventEmitter implementation that combines
 // the best from node's EventEmitter, EE2 and Backbone. In
 // default sync mode it should perform better than all of the above,
 // while offering a compatible API and extra features like a debug mode.
@@ -369,9 +369,9 @@
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = EventEmitter
     } else if (typeof define === 'function') {
-        define('Emmy', function () { return EventEmitter })
+        define('Evy', function () { return EventEmitter })
     } else {
-        this.Emmy = EventEmitter
+        this.Evy = EventEmitter
     }
 
 }).call(this);
