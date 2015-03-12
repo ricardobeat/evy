@@ -1,12 +1,15 @@
 /* jshint sub: true */
 
-var Table        = require('easy-table')
-var queue        = require('queue-async')
-var Emmy         = require('../events')
-var Backbone     = require('backbone')
-var EventEmitter = require('events').EventEmitter
-var Event_mitter = require('event-emitter')
-var _            = require('backbone/node_modules/underscore')
+var Table  = require('easy-table')
+var queue  = require('queue-async')
+
+var Evy           = require('../events')
+var BackboneEE    = require('backbone').Events
+var EventEmitter  = require('events').EventEmitter
+var FastEmitter   = require('fastemitter')
+var Event_Emitter = require('event-emitter')
+var EventEmitter2 = require('eventemitter2').EventEmitter2
+var EventEmitter3 = require('eventemitter3').EventEmitter
 
 function printResults (results) {
     var t = new Table
@@ -21,15 +24,30 @@ function printResults (results) {
 
 function testAll (testName, args, next) {
     var results = []
-    queue()
-        .defer(test, results, testName, "Emmy", new Emmy, args)
-        .defer(test, results, testName, "Backbone.Events", _.extend({}, Backbone.Events), args)
-        .defer(test, results, testName, "node EventEmitter", new EventEmitter, args)
-        .defer(test, results, testName, "event-emitter", Event_mitter({}), args)
-        .await(function(){
-            printResults(results)
-            next()
-        })
+    var q = queue()
+
+    var libs = [
+        [ "Backbone.Events" , BackboneEE          ],
+        [ "fastemitter"     , new FastEmitter()   ],
+        [ "event-emitter"   , Event_Emitter({})   ],
+        [ "node events"     , new EventEmitter()  ],
+        [ "EventEmitter2"   , new EventEmitter2() ],
+        [ "EventEmitter3"   , new EventEmitter3() ],
+        [ "Evy"             , new Evy             ]
+    ]
+
+    if (typeof window !== 'undefined') {
+        libs.unshift([ "jQuery", require('jquery')({}) ])
+    }
+
+    libs.forEach(function (lib) {
+        q.defer(test, results, testName, lib[0], lib[1], args)
+    })
+    
+    q.await(function(){
+        printResults(results)
+        next()
+    })
 }
 
 function test (group, header, name, emitter, args, next) {
@@ -48,13 +66,13 @@ function test (group, header, name, emitter, args, next) {
     var done = function (sync) {
         if (received != emitted) return
 
-        var elapsed = ((Date.now() - (sync ? start : after)) / 1000).toFixed(3)
+        var elapsed = ((Date.now() - (sync ? start : after)) / 1000)
         var rate    = (received / elapsed).toFixed(3)
         var mem     = process.memoryUsage()
         var bytes   = ((mem.heapUsed - heapUsed) / received).toFixed(2)
 
         data['received'] = received
-        data['time'] = elapsed
+        data['time'] = elapsed.toFixed(2) + 's'
         data['received/sec'] = rate
         data['memory'] = (bytes > 20 ? (bytes | 0) + ' bytes' : 'n/a')
 
@@ -82,7 +100,7 @@ function test (group, header, name, emitter, args, next) {
     var after = Date.now()
 
     data['emitted'] = emitted
-    data['events/sec'] = (emitted / duration).toFixed(2)
+    data['events/sec (*1k)'] = Math.floor(emitted / duration) | 0
     data['immediate'] = received
     done(true)
 }
@@ -93,10 +111,10 @@ console.log('Running benchmarks...\n')
 queue()
     .defer(testAll, 'No arguments', 0)
     .defer(testAll, 'One argument', 1)
-    .defer(testAll, 'Four arguments', 4)
+    .defer(testAll, 'Three arguments', 3)
     .defer(function(){
         var results = []
-        test(results, 'async', "Emmy.async", new Emmy({ async: true }), 4, function () {
+        test(results, 'async', "Evy.async", new Evy({ async: true }), 1, function () {
             printResults(results)
         })
     })

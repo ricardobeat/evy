@@ -17,6 +17,9 @@
     "coffee-script": "^1.7.1",
     "easy-table": "^0.3.0",
     "event-emitter": "^0.3.1",
+    "eventemitter2": "^0.4.14",
+    "eventemitter3": "^0.1.6",
+    "fastemitter": "0.0.5-0",
     "mocha": "^1.21.3",
     "queue-async": "^1.0.7",
     "should": "^4.0.4"
