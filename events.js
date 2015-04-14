@@ -2,15 +2,13 @@
 
 //     evy.js
 //
-//     Version 0.1.0
+//     Version 0.2.0
 //     Ricardo Tomasi <ricardobeat@gmail.com>
 //     License: MIT (http://ricardo.mit-license.org/)
 //     http://github.com/ricardobeat/evy
 
-// Evy is a modern EventEmitter implementation that combines
-// the best from node's EventEmitter, EE2 and Backbone. In
-// default sync mode it should perform better than all of the above,
-// while offering a compatible API and extra features like a debug mode.
+// Evy.js is a modern EventEmitter implementation that combines
+// the best from node's EventEmitter, EE2 and Backbone Events.
 
 ;(function(){
 
