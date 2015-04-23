@@ -44,7 +44,7 @@ defineSuite = (suiteName, options) ->
                 x.on 'click', fn
                 x.removeListener 'click'
                 x.emit 'click', -> assert.fail('Remove listener by name')
-            
+
             test 'remove all listener', ->
                 x = new EventEmitter(options)
                 fn = -> 123
@@ -93,7 +93,7 @@ defineSuite = (suiteName, options) ->
                     assert arg is 4, "Argument received"
                 x.emit 'click', 4
                 x.emit 'click', 5
-                
+
                 setImmediate ->
                     assert count is 1
                     done()
