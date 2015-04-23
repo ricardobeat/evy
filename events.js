@@ -2,7 +2,7 @@
 
 //     evy.js
 //
-//     Version 0.2.0
+//     Version 0.2.1
 //     Ricardo Tomasi <ricardobeat@gmail.com>
 //     License: MIT (http://ricardo.mit-license.org/)
 //     http://github.com/ricardobeat/evy
@@ -43,29 +43,31 @@
     function EventEmitter (options) {
         options || (options = {})
 
-        this._events    = {}               // listeners attached to this emitter
-        this._listening = []               // remote listeners (listenTo)
-        this.context    = options.context  // default emitter context
-        this.eventCount = 0
-        this.name       = options.name || ++uid
+        var _events = this._events = {
+            events    : {},                     // listeners attached to this emitter
+            listening : [],                     // remote listeners (listenTo)
+            context   : options.context,        // default emitter context
+            count     : 0,
+            name      : options.name || ++uid
+        }
 
         if (options.debug) {
-            this._debug = true
-            this._last  = { time: 0, eventCount : 0 }
+            _events.debug = true
+            _events.last  = { time: 0, eventCount : 0 }
         }
 
         if (options.strict) {
-            this._strict = true
-            this._eventKeys = options.events
+            _events.strict = true
+            _events.strictKeys = options.events
             if (!options.events) {
-                throw new Error('No events defined for emitter ' + this.name)
+                throw new Error('No events defined for emitter ' + _events.name)
             }
         }
 
         if (options.async) {
             this.emitSync = this.emit
             this.emit     = this.emitNext
-            this._async   = true
+            _events.async = true
         }
     }
 
@@ -74,9 +76,10 @@
     // by all the methods that manipulate events.
 
     function validateEvent (emitter, method, name) {
-        if (emitter._strict && emitter._eventKeys.hasOwnProperty(name)) return
+        var ee = emitter._events
+        if (ee.strict && ee.strictKeys.hasOwnProperty(name)) return
         var err = new Error(
-            method + "(): event '" + name + "' has not been registered for emitter " + emitter.name
+            method + "(): event '" + name + "' has not been registered for emitter " + ee.name
         )
         err.emitter = emitter
         throw err
@@ -94,12 +97,14 @@
     //     })
     //
 
-    // #### .addListener
+    // .addListener
+    // ------------------------------------------------------------------------
     // Adds a handler to the events list.
 
     EventEmitter.prototype.addListener = function (name, fn, context) {
-        this._strict && validateEvent(this, 'addListener', name)
-        var handlers = this._events[name] || (this._events[name] = [])
+        var ee = this._events
+        if (ee.strict) validateEvent(this, 'addListener', name)
+        var handlers = ee.events[name] || (ee.events[name] = [])
         handlers.push(context ? { fn: fn, context: context } : fn)
         for (var i = 0; i < handlers.length; i++) {
             if (handlers[i] == null) handlers.splice(i, 1)
@@ -107,11 +112,13 @@
         return this
     }
 
-    // #### .once
+    // .once
+    // ------------------------------------------------------------------------
     // Adds a handler that will only get called once, by removing itself after the first call.
 
     EventEmitter.prototype.once = function (name, fn) {
-        this._strict && validateEvent(this, 'once', name)
+        var ee = this._events
+        if (ee.strict) validateEvent(this, 'once', name)
         var self  = this
         var fired = false
         function onceFn () {
@@ -124,20 +131,22 @@
         return this.addListener(name, onceFn)
     }
 
-    // #### .removeListener
+    // .removeListener
+    // ------------------------------------------------------------------------
     // Removes an event handler from the events list.
 
     EventEmitter.prototype.removeListener = function (name, fn, context) {
-        this._strict && validateEvent(this, 'removeListener', name)
+        var ee = this._events
+        if (ee.strict) validateEvent(this, 'removeListener', name)
         var self     = this
-        var handlers = this._events[name]
+        var handlers = this._events.events[name]
         // Remove all events, filtering by function if provided
         if (name === '*') {
             if (!fn) {
-                this._events = {}
+                ee.events = {}
             } else {
-                for (var _name in this._events) {
-                    if (this._events.hasOwnProperty(_name)) {
+                for (var _name in ee.events) {
+                    if (ee.events.hasOwnProperty(_name)) {
                         self.removeListener(_name, fn)
                     }
                 }
@@ -145,6 +154,7 @@
         // Otherwise find handlers that match the given event name and function signature
         } else if (fn && handlers) {
             for (var i = 0; i < handlers.length; i++) {
+                var ee = ee
                 if (handlers[i] && (handlers[i] === fn || handlers[i].fn === fn)) {
                     /* instead of calling .splice(i, 1) here, we'll
                     set this handler to null and defer the cleanup
@@ -153,33 +163,36 @@
                 }
             }
             if (handlers.length === 0) {
-                delete this._events[name]
+                delete ee.events[name]
             }
         // If only a name was given, remove all handlers for this event
         } else {
-            delete this._events[name]
+            delete ee.events[name]
         }
         return this
     }
 
-    // #### .emit
+    // .emit
+    // ------------------------------------------------------------------------
     // The `emit` method calls all handlers that match the given event type.
 
     EventEmitter.prototype.emit = function (name) {
-        this._strict && validateEvent(this, 'emit', name)
-        var handlers = this._events[name]
-        this._debug && this.tick()
+        var ee = this._events
+        if (ee.strict) validateEvent(this, 'emit', name)
+        var handlers = ee.events[name]
+        if (ee.debug) this.tick()
         if (!handlers) return this
+        var handler, context, fn, length
         for (var i = 0; i < handlers.length; i++) {
-            var handler = handlers[i]
+            handler = handlers[i]
             if (!handler) continue
-            var context = handler.context || this._context || this
-            var fn      = handler.fn || handler
-            var length  = arguments.length
+            context = handler.context || ee._context || this
+            fn      = handler.fn || handler
+            length  = arguments.length
             switch (length) { // optimize most common calls (inspired by Backbone)
-                case 1: fn.call(context); break
-                case 2: fn.call(context, arguments[1]); break
-                case 3: fn.call(context, arguments[1], arguments[2]); break
+                case 1: return fn.call(context), this;
+                case 2: return fn.call(context, arguments[1]), this;
+                case 3: return fn.call(context, arguments[1], arguments[2]), this;
                 default: // args optimization borrowed from node EventEmitter (lib/events.js)
                     var args = new Array(length - 1)
                     for (i = 1; i < length; i++) args[i - 1] = arguments[i]
@@ -189,13 +202,15 @@
         return this
     }
 
-    // #### .emitNext
+    // .emitNext
+    // ------------------------------------------------------------------------
     // Schedules an event to the next tick, using the methods
     // available in the environment. Useful when an emitter fires events
     // straight after creation, without giving listeners a chance to be setup.
 
     EventEmitter.prototype.emitNext = function (name) {
-        this._strict && validateEvent(this, 'emitNext', name)
+        var ee = this._events
+        if (ee.strict) validateEvent(this, 'emitNext', name)
         var self = this, args = arguments
         var run = _bind(EventEmitter.prototype.emit, self, args)
         return _hasImmediate ? setImmediate(run) : setTimeout(run, 0)
@@ -207,16 +222,18 @@
     // *TODO: trigger console warning if rate is too high*
 
     EventEmitter.prototype.tick = function () {
+        var ee   = this._events
         var now  = +new Date
-        var last = this._last
-        this.eventCount++
+        var last = ee.last
+        ee.count++
         if (now - last.time > 5000) {
-            this.rate = Math.floor((this.eventCount - last.eventCount) / (now - last.time) / 1000)
-            this._last = { time: now, eventCount: this.eventCount }
+            ee.rate = Math.floor((ee.count - last.count) / (now - last.time) / 1000)
+            ee.last = { time: now, count: ee.count }
         }
     }
 
-    // #### .proxy
+    // .proxy
+    // ------------------------------------------------------------------------
     // The `proxy` method returns a function that emits $name event on the emitter that
     // created it. It also accepts a `transform` function that will be called on the event
     // data before being forwarded. Use (with caution) to create event chains / pipes.
@@ -233,18 +250,21 @@
         }
     }
 
-    // #### .listenTo
+    // .listenTo
+    // ------------------------------------------------------------------------
     // The `listenTo` method attaches listeners to another object,
     // while keeping track of them for easy clean-up. The gist of the implementation
     // is handled by the `RemoteListener` objects.
 
     EventEmitter.prototype.listenTo = function (target, name, fn, context) {
+        var ee = this._events
         var listener = new RemoteListener(target, name, fn, context)
         listener.attach()
-        this._listening.push(listener)
+        ee.listening.push(listener)
     }
 
-    // #### .listenToOne
+    // .listenToOne
+    // ------------------------------------------------------------------------
     // `listenToOne` is the same as above but with "once" behaviour, removing itself
     // after the first call.
 
@@ -260,18 +280,21 @@
         return this.listenTo(target, name, onceFn, context)
     }
 
-    // #### .stopListening
+    // .stopListening
+    // ------------------------------------------------------------------------
     // Removes all remote listeners.
 
     EventEmitter.prototype.stopListening = function (target, name, fn) {
-        for (var i = 0, listener; listener = this._listening[i]; i++) {
+        var ee = this._events
+        for (var i = 0, listener; listener = ee.listening[i]; i++) {
             if (listener.matches(target, name, fn)) {
                 listener.detach()
             }
         }
     }
 
-    // #### .destroy
+    // .destroy
+    // ------------------------------------------------------------------------
     // A shortcut for easily removing all local *and* remote listeners.
 
     EventEmitter.prototype.destroy = function () {
@@ -322,9 +345,8 @@
     }
 
 
-    // ### Convenience methods
-
-    // #### EventEmitter.extend
+    // EventEmitter.extend
+    // ------------------------------------------------------------------------
     // Copies all properties and methods to target object.
     // For use when creating a new emitter instance, or prototypal inheritance, is undesired. 
 
@@ -338,23 +360,19 @@
         return target
     }
 
-    // #### EventEmitter.create
+    // EventEmitter.create
+    // ------------------------------------------------------------------------
     // Creates a new emitter without the `new` keyword. Makes some people very happy.
     EventEmitter.create = function (options) {
         return new EventEmitter(options)
     }
 
-
     // Create aliases for the most common method names, makes it somewhat compatible with
     // other emitter implementations.
     var aliases = {
         on            : 'addListener',
-        off           : 'removeListener',
         trigger       : 'emit',
-        one           : 'once',
-        publish       : 'emit',
-        subscribe     : 'addListener',
-        unsubscribe   : 'removeListener'
+        one           : 'once'
     }
 
     for (var key in aliases) {
