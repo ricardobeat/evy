@@ -73,7 +73,7 @@
 
     // When given the option { strict: true }, an emitter will validate the
     // event names before adding handlers or emitting an event. This method is shared
-    // by all the methods that manipulate events.
+    // by all methods that manipulate events.
 
     function validateEvent (emitter, method, name) {
         var ee = emitter._events
@@ -111,7 +111,7 @@
 
     // .once
     // ------------------------------------------------------------------------
-    // Adds a handler that will only get called once, by removing itself after the first call.
+    // Adds a handler that will only get called once, removing itself after the first call.
 
     EventEmitter.prototype.once = function (name, fn) {
         var ee = this._events
@@ -198,10 +198,9 @@
 
     // .emitNext
     // ------------------------------------------------------------------------
-    // Schedules an event to the next tick, using the methods
-    // available in the environment. Useful when an emitter fires events
-    // straight after creation, without giving listeners a chance to be setup.
-
+    // Schedules an event to the next tick, using whatever method is
+    // available in the environment. Useful when an emitter starts firing events
+    // immediately after creation, before any listeners are added.
     EventEmitter.prototype.emitNext = function (name) {
         var ee = this._events
         if (ee.strict) validateEvent(this, 'emitNext', name)
@@ -211,7 +210,7 @@
     }
 
     // The `tick` method is here for debugging purposes. It keeps count of emitted events over time
-    // and calculates a running average rate for the past 2 seconds. Mostly useful for finding 
+    // and calculates a running average rate for the past 2 seconds. Mostly useful for finding
     // accidental loops and optimizing code.
     // *TODO: trigger console warning if rate is too high*
 
@@ -302,7 +301,7 @@
 
     // Internal object used by the `listenTo()` family of methods. Keeps track of all listeners added to
     // another emitter, forwarding method calls and arguments.
-    
+
     function RemoteListener (target, name, fn, context) {
         this.target  = target
         this.name    = name
@@ -342,7 +341,7 @@
     // EventEmitter.extend
     // ------------------------------------------------------------------------
     // Copies all properties and methods to target object.
-    // For use when creating a new emitter instance, or prototypal inheritance, is undesired. 
+    // For use when creating a new emitter instance, or prototypal inheritance, is undesired.
 
     EventEmitter.extend = function (target, options) {
         EventEmitter.call(target, options)
