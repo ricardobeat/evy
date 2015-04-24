@@ -106,9 +106,6 @@
         if (ee.strict) validateEvent(this, 'addListener', name)
         var handlers = ee.events[name] || (ee.events[name] = [])
         handlers.push(context ? { fn: fn, context: context } : fn)
-        for (var i = 0; i < handlers.length; i++) {
-            if (handlers[i] == null) handlers.splice(i, 1)
-        }
         return this
     }
 
@@ -135,7 +132,7 @@
     // ------------------------------------------------------------------------
     // Removes an event handler from the events list.
 
-    EventEmitter.prototype.removeListener = function (name, fn, context) {
+    EventEmitter.prototype.removeListener = function (name, fn) {
         var ee = this._events
         if (ee.strict) validateEvent(this, 'removeListener', name)
         var self     = this
@@ -153,13 +150,11 @@
             }
         // Otherwise find handlers that match the given event name and function signature
         } else if (fn && handlers) {
-            for (var i = 0; i < handlers.length; i++) {
+            var _handlers = slice.call(handlers, 0)
+            for (var i = 0; i < _handlers.length; i++) {
                 var ee = ee
-                if (handlers[i] && (handlers[i] === fn || handlers[i].fn === fn)) {
-                    /* instead of calling .splice(i, 1) here, we'll
-                    set this handler to null and defer the cleanup
-                    to the next addListener call. */
-                    handlers[i] = null
+                if (_handlers[i] && (_handlers[i] === fn || _handlers[i].fn === fn)) {
+                    handlers.splice(i, 1)
                 }
             }
             if (handlers.length === 0) {
@@ -169,6 +164,7 @@
         } else {
             delete ee.events[name]
         }
+
         return this
     }
 
@@ -179,20 +175,18 @@
     EventEmitter.prototype.emit = function (name) {
         var ee = this._events
         if (ee.strict) validateEvent(this, 'emit', name)
-        var handlers = ee.events[name]
         if (ee.debug) this.tick()
+        var handlers = ee.events[name]
         if (!handlers) return this
-        var handler, context, fn, length
         for (var i = 0; i < handlers.length; i++) {
-            handler = handlers[i]
-            if (!handler) continue
-            context = handler.context || ee._context || this
-            fn      = handler.fn || handler
-            length  = arguments.length
+            var handler = handlers[i]
+            var context = handler.context || ee._context || this
+            var fn      = handler.fn || handler
+            var length  = arguments.length
             switch (length) { // optimize most common calls (inspired by Backbone)
-                case 1: return fn.call(context), this;
-                case 2: return fn.call(context, arguments[1]), this;
-                case 3: return fn.call(context, arguments[1], arguments[2]), this;
+                case 1: fn.call(context); break
+                case 2: fn.call(context, arguments[1]); break
+                case 3: fn.call(context, arguments[1], arguments[2]); break
                 default: // args optimization borrowed from node EventEmitter (lib/events.js)
                     var args = new Array(length - 1)
                     for (i = 1; i < length; i++) args[i - 1] = arguments[i]
