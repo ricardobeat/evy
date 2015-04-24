@@ -85,10 +85,8 @@ defineSuite = (suiteName, options) ->
             if /async/.test suiteName
                 test 'emit before listen', (done) ->
                     x = new EventEmitter(options)
-                    console.log(options)
                     x.emit 'test-before'
-                    console.log('adding listener')
-                    x.on 'test-before', -> console.log('hey'); done()
+                    x.on 'test-before', -> done()
 
 
         suite 'once', ->
