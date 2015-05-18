@@ -1,8 +1,10 @@
 
 EventEmitter = require '../events'
+
 assert = require 'assert'
 extend = require('util')._extend
 
+require('../listenTo').extend(EventEmitter)
 
 defineSuite = (suiteName, options) ->
 
