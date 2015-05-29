@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>events.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="events.html">
+                  events.js
+                </a>
+              
+                
+                <a class="source" href="listenTo.html">
+                  listenTo.js
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>events.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/* jshint asi:true, boss:true, expr:true, eqnull:true, -W058 */</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <pre><code>evy.js
+
+Version <span class="hljs-number">0.2</span>.1
+Ricardo Tomasi &lt;ricardobeat@gmail.com&gt;
+License: MIT (http:<span class="hljs-comment">//ricardo.mit-license.org/)</span>
+http:<span class="hljs-comment">//github.com/ricardobeat/evy</span>
+</code></pre>
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Evy.js is a modern EventEmitter implementation that combines
+the best from node’s EventEmitter, EE2 and Backbone Events.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+;(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>First we declare some utility variables. The <code>uid</code> is used to assign a unique id
+for emitters, if a name has not been provided.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+    <span class="hljs-keyword">var</span> slice = <span class="hljs-built_in">Array</span>.prototype.slice
+    <span class="hljs-keyword">var</span> _hasImmediate = (<span class="hljs-keyword">typeof</span> setImmediate === <span class="hljs-string">'function'</span>)
+    <span class="hljs-keyword">var</span> uid = <span class="hljs-number">0</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Function binding method. Doing this is faster and uses less memory than <code>Function.prototype.bind</code>.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_bind</span> (<span class="hljs-params">fn, context, args</span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">return</span> fn.apply(context, args)
+        }
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <h2 id="eventemitter">EventEmitter</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>This is the EventEmitter constructor, accepting a single <em>options</em> object
+for configuration. The options are:</p>
+<ul>
+<li><strong>name</strong>   : <em>String</em>  [optional name]</li>
+<li><strong>strict</strong> : <em>Boolean</em> [enable strict mode]</li>
+<li><strong>async</strong>  : <em>Boolean</em> [use emitNext by default]</li>
+<li><strong>debug</strong>  : <em>Boolean</em> [enable debug mode]</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">EventEmitter</span> (<span class="hljs-params">options</span>) </span>{
+        options || (options = {})
+
+        <span class="hljs-keyword">var</span> _events = <span class="hljs-keyword">this</span>._events = {
+            events    : {},                     <span class="hljs-comment">// listeners attached to this emitter</span>
+            listening : [],                     <span class="hljs-comment">// remote listeners (listenTo)</span>
+            context   : options.context,        <span class="hljs-comment">// default emitter context</span>
+            count     : <span class="hljs-number">0</span>,
+            name      : options.name || ++uid
+        }
+
+        <span class="hljs-keyword">if</span> (options.debug) {
+            _events.debug = <span class="hljs-literal">true</span>
+            _events.last  = { time: <span class="hljs-number">0</span>, eventCount : <span class="hljs-number">0</span> }
+        }
+
+        <span class="hljs-keyword">if</span> (options.strict) {
+            _events.strict = <span class="hljs-literal">true</span>
+            _events.strictKeys = options.events
+            <span class="hljs-keyword">if</span> (!options.events) {
+                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'No events defined for emitter '</span> + _events.name)
+            }
+        }
+
+        <span class="hljs-keyword">if</span> (options.async) {
+            <span class="hljs-keyword">this</span>.emitSync = <span class="hljs-keyword">this</span>.emit
+            <span class="hljs-keyword">this</span>.emit     = <span class="hljs-keyword">this</span>.emitNext
+            _events.async = <span class="hljs-literal">true</span>
+        }
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>When given the option { strict: true }, an emitter will validate the
+event names before adding handlers or emitting an event. This method is shared
+by all methods that manipulate events.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">validateEvent</span> (<span class="hljs-params">emitter, method, name</span>) </span>{
+        <span class="hljs-keyword">var</span> ee = emitter._events
+        <span class="hljs-keyword">if</span> (ee.strict &amp;&amp; ee.strictKeys.hasOwnProperty(name)) <span class="hljs-keyword">return</span>
+        <span class="hljs-keyword">var</span> err = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(
+            method + <span class="hljs-string">"(): event '"</span> + name + <span class="hljs-string">"' has not been registered for emitter "</span> + ee.name
+        )
+        err.emitter = emitter
+        <span class="hljs-keyword">throw</span> err
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>In this case all events must be declared on creation. For example:</p>
+<pre><code><span class="hljs-keyword">new</span> EventEmitter({
+    strict: <span class="hljs-literal">true</span>,
+    events: {
+        <span class="hljs-string">'eventName'</span> : <span class="hljs-string">'description'</span>,
+        <span class="hljs-string">'open'</span>      : <span class="hljs-string">'Open stuff'</span>,
+        <span class="hljs-string">'close'</span>     : <span class="hljs-string">'Close stuff'</span>
+    }
+})
+</code></pre>
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <h2 id="-addlistener">.addListener</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Adds a handler to the events list.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+    EventEmitter.prototype.addListener = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, fn, context</span>) </span>{
+        <span class="hljs-keyword">var</span> ee = <span class="hljs-keyword">this</span>._events
+        <span class="hljs-keyword">if</span> (ee.strict) validateEvent(<span class="hljs-keyword">this</span>, <span class="hljs-string">'addListener'</span>, name)
+        <span class="hljs-keyword">var</span> handlers = ee.events[name] || (ee.events[name] = [])
+        handlers.push(context ? { fn: fn, context: context } : fn)
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <h2 id="-once">.once</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Adds a handler that will only get called once, removing itself after the first call.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+    EventEmitter.prototype.once = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, fn</span>) </span>{
+        <span class="hljs-keyword">var</span> ee = <span class="hljs-keyword">this</span>._events
+        <span class="hljs-keyword">if</span> (ee.strict) validateEvent(<span class="hljs-keyword">this</span>, <span class="hljs-string">'once'</span>, name)
+        <span class="hljs-keyword">var</span> self  = <span class="hljs-keyword">this</span>
+        <span class="hljs-keyword">var</span> fired = <span class="hljs-literal">false</span>
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onceFn</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">if</span> (!fired) {
+                fired = <span class="hljs-literal">true</span>
+                fn.apply(<span class="hljs-keyword">this</span>, <span class="hljs-built_in">arguments</span>)
+                self.removeListener(name, onceFn)
+            }
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.addListener(name, onceFn)
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <h2 id="-removelistener">.removeListener</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Removes an event handler from the events list.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+    EventEmitter.prototype.removeListener = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, fn</span>) </span>{
+        <span class="hljs-keyword">var</span> ee = <span class="hljs-keyword">this</span>._events
+        <span class="hljs-keyword">if</span> (ee.strict) validateEvent(<span class="hljs-keyword">this</span>, <span class="hljs-string">'removeListener'</span>, name)
+        <span class="hljs-keyword">var</span> self     = <span class="hljs-keyword">this</span>
+        <span class="hljs-keyword">var</span> handlers = <span class="hljs-keyword">this</span>._events.events[name]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Remove all events, filtering by function if provided</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> (name === <span class="hljs-string">'*'</span>) {
+            <span class="hljs-keyword">if</span> (!fn) {
+                ee.events = {}
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> _name <span class="hljs-keyword">in</span> ee.events) {
+                    <span class="hljs-keyword">if</span> (ee.events.hasOwnProperty(_name)) {
+                        self.removeListener(_name, fn)
+                    }
+                }
+            }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Otherwise find handlers that match the given event name and function signature</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (fn &amp;&amp; handlers) {
+            <span class="hljs-keyword">var</span> _handlers = slice.call(handlers, <span class="hljs-number">0</span>)
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; _handlers.length; i++) {
+                <span class="hljs-keyword">var</span> ee = ee
+                <span class="hljs-keyword">if</span> (_handlers[i] &amp;&amp; (_handlers[i] === fn || _handlers[i].fn === fn)) {
+                    handlers.splice(i, <span class="hljs-number">1</span>)
+                }
+            }
+            <span class="hljs-keyword">if</span> (handlers.length === <span class="hljs-number">0</span>) {
+                <span class="hljs-keyword">delete</span> ee.events[name]
+            }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>If only a name was given, remove all handlers for this event</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">delete</span> ee.events[name]
+        }
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <h2 id="-emit">.emit</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>The <code>emit</code> method calls all handlers that match the given event type.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+    EventEmitter.prototype.emit = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+        <span class="hljs-keyword">var</span> ee = <span class="hljs-keyword">this</span>._events
+        <span class="hljs-keyword">if</span> (ee.strict) validateEvent(<span class="hljs-keyword">this</span>, <span class="hljs-string">'emit'</span>, name)
+        <span class="hljs-keyword">if</span> (ee.debug) <span class="hljs-keyword">this</span>.tick()
+        <span class="hljs-keyword">var</span> handlers = ee.events[name]
+        <span class="hljs-keyword">if</span> (!handlers) <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; handlers.length; i++) {
+            <span class="hljs-keyword">var</span> handler = handlers[i]
+            <span class="hljs-keyword">var</span> context = handler.context || ee._context || <span class="hljs-keyword">this</span>
+            <span class="hljs-keyword">var</span> fn      = handler.fn || handler
+            <span class="hljs-keyword">var</span> length  = <span class="hljs-built_in">arguments</span>.length
+            <span class="hljs-keyword">switch</span> (length) { <span class="hljs-comment">// optimize most common calls (inspired by Backbone)</span>
+                <span class="hljs-keyword">case</span> <span class="hljs-number">1</span>: fn.call(context); <span class="hljs-keyword">break</span>
+                <span class="hljs-keyword">case</span> <span class="hljs-number">2</span>: fn.call(context, <span class="hljs-built_in">arguments</span>[<span class="hljs-number">1</span>]); <span class="hljs-keyword">break</span>
+                <span class="hljs-keyword">case</span> <span class="hljs-number">3</span>: fn.call(context, <span class="hljs-built_in">arguments</span>[<span class="hljs-number">1</span>], <span class="hljs-built_in">arguments</span>[<span class="hljs-number">2</span>]); <span class="hljs-keyword">break</span>
+                <span class="hljs-keyword">default</span>: <span class="hljs-comment">// args optimization borrowed from node EventEmitter (lib/events.js)</span>
+                    <span class="hljs-keyword">var</span> args = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(length - <span class="hljs-number">1</span>)
+                    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">1</span>; i &lt; length; i++) args[i - <span class="hljs-number">1</span>] = <span class="hljs-built_in">arguments</span>[i]
+                    fn.apply(context, args)
+            }
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <h2 id="-emitnext">.emitNext</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Schedules an event to the next tick, using whatever method is
+available in the environment. Useful when an emitter starts firing events
+immediately after creation, before any listeners are added.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    EventEmitter.prototype.emitNext = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+        <span class="hljs-keyword">var</span> ee = <span class="hljs-keyword">this</span>._events
+        <span class="hljs-keyword">if</span> (ee.strict) validateEvent(<span class="hljs-keyword">this</span>, <span class="hljs-string">'emitNext'</span>, name)
+        <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>, args = <span class="hljs-built_in">arguments</span>
+        <span class="hljs-keyword">var</span> run = _bind(EventEmitter.prototype.emit, self, args)
+        <span class="hljs-keyword">return</span> _hasImmediate ? setImmediate(run) : setTimeout(run, <span class="hljs-number">0</span>)
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>The <code>tick</code> method is here for debugging purposes. It keeps count of emitted events over time
+and calculates a running average rate for the past 2 seconds. Mostly useful for finding
+accidental loops and optimizing code.
+<em>TODO: trigger console warning if rate is too high</em></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+    EventEmitter.prototype.tick = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">var</span> ee   = <span class="hljs-keyword">this</span>._events
+        <span class="hljs-keyword">var</span> now  = +<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>
+        <span class="hljs-keyword">var</span> last = ee.last
+        ee.count++
+        <span class="hljs-keyword">if</span> (now - last.time &gt; <span class="hljs-number">5000</span>) {
+            ee.rate = <span class="hljs-built_in">Math</span>.floor((ee.count - last.count) / (now - last.time) / <span class="hljs-number">1000</span>)
+            ee.last = { time: now, count: ee.count }
+        }
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <h2 id="-proxy">.proxy</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>The <code>proxy</code> method returns a function that emits $name event on the emitter that
+created it. It also accepts a <code>transform</code> function that will be called on the event
+data before being forwarded. Use (with caution) to create event chains / pipes.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+    EventEmitter.prototype.proxy = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, transform</span>) </span>{
+        <span class="hljs-keyword">var</span> self = <span class="hljs-keyword">this</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">var</span> args = slice.call(<span class="hljs-built_in">arguments</span>, <span class="hljs-number">0</span>)
+            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> transform === <span class="hljs-string">'function'</span>) {
+                args = transform.apply(<span class="hljs-literal">null</span>, args)
+            }
+            args.unshift(name)
+            self.emit.apply(self, args)
+        }
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <h2 id="eventemitter-extend">EventEmitter.extend</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>Copies all properties and methods to target object.
+For use when creating a new emitter instance, or prototypal inheritance, is undesired.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+    EventEmitter.extend = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">target, options</span>) </span>{
+        EventEmitter.call(target, options)
+        <span class="hljs-keyword">var</span> proto = EventEmitter.prototype
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> key <span class="hljs-keyword">in</span> proto) {
+            <span class="hljs-keyword">if</span> (!proto.hasOwnProperty(key)) <span class="hljs-keyword">continue</span>
+            target[key] = proto[key]
+        }
+        <span class="hljs-keyword">return</span> target
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <h2 id="eventemitter-create">EventEmitter.create</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>Creates a new emitter without the <code>new</code> keyword. Makes some people very happy.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    EventEmitter.create = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">options</span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> EventEmitter(options)
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>Create aliases for the most common method names, makes it somewhat compatible with
+other emitter implementations.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> aliases = {
+        on            : <span class="hljs-string">'addListener'</span>,
+        trigger       : <span class="hljs-string">'emit'</span>,
+        one           : <span class="hljs-string">'once'</span>
+    }
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> key <span class="hljs-keyword">in</span> aliases) {
+        <span class="hljs-keyword">if</span> (!aliases.hasOwnProperty(key)) <span class="hljs-keyword">continue</span>
+        EventEmitter.prototype[key] = EventEmitter.prototype[aliases[key]]
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>Finally, export the constructor as a commonJS / global / AMD module.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">module</span> !== <span class="hljs-string">'undefined'</span> &amp;&amp; <span class="hljs-built_in">module</span>.exports) {
+        <span class="hljs-built_in">module</span>.exports = EventEmitter
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> define === <span class="hljs-string">'function'</span>) {
+        define(<span class="hljs-string">'Evy'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">return</span> EventEmitter })
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">this</span>.Evy = EventEmitter
+    }
+
+}).call(<span class="hljs-keyword">this</span>);</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
