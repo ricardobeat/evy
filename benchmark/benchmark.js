@@ -3,7 +3,7 @@
 var Table  = require('easy-table')
 var queue  = require('queue-async')
 
-var Evy           = require('../events')
+var Evy           = require('../')
 var BackboneEE    = require('backbone').Events
 var EventEmitter  = require('events').EventEmitter
 var FastEmitter   = require('fastemitter')

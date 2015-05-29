@@ -1,5 +1,5 @@
 
-EventEmitter = require '../events'
+EventEmitter = require '../'
 assert = require 'assert'
 extend = require('util')._extend
 

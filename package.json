@@ -1,10 +1,11 @@
 {
   "name": "evy",
   "version": "0.2.0",
-  "description": "webscale event emitter",
-  "main": "events.js",
+  "description": "the best kind of emitter",
+  "main": "evy.js",
   "directories": {
-    "test": "test"
+    "test": "test",
+    "doc": "docs"
   },
   "scripts": {
     "test": "mocha",
