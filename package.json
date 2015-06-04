@@ -1,6 +1,6 @@
 {
   "name": "evy",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "the best kind of emitter",
   "main": "evy.js",
   "directories": {

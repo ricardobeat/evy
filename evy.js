@@ -2,7 +2,7 @@
 
 //     evy.js
 //
-//     Version 0.2.1
+//     Version 0.2.2
 //     Ricardo Tomasi <ricardobeat@gmail.com>
 //     License: MIT (http://ricardo.mit-license.org/)
 //     http://github.com/ricardobeat/evy
