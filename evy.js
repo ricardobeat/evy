@@ -268,9 +268,10 @@
     // Create aliases for the most common method names, makes it somewhat compatible with
     // other emitter implementations.
     var aliases = {
-        on            : 'addListener',
-        trigger       : 'emit',
-        one           : 'once'
+        on      : 'addListener',
+        off     : 'removeListener',
+        trigger : 'emit',
+        one     : 'once'
     }
 
     for (var key in aliases) {
