@@ -80,7 +80,11 @@
         RemoteListener.prototype.attach = function () {
             var target = this.target
             var method = target.addListener || target.on || target.bind
-            method.call(target, this.name, this.fn, this.context)
+            if (target.constructor === EventEmitter) {
+                method.call(target, this.name, this.fn, this.context)
+            } else {
+                method.call(target, this.name, this.fn.bind(this.context))
+            }
             return this
         }
 
