@@ -103,6 +103,7 @@
 
     EventEmitter.prototype.addListener = function (name, fn, context) {
         var ee = this._events
+        if (name == null) throw new Error('addListener(name, fn, context): name cant be ' + name)
         if (ee.strict) validateEvent(this, 'addListener', name)
         var handlers = ee.events[name] || (ee.events[name] = [])
         handlers.push(context ? { fn: fn, context: context } : fn)
@@ -174,6 +175,7 @@
 
     EventEmitter.prototype.emit = function (name) {
         var ee = this._events
+        if (name == null) throw new Error('emit(name): name cant be ' + name)
         if (ee.strict) validateEvent(this, 'emit', name)
         if (ee.debug) this.tick()
         var handlers = ee.events[name]
