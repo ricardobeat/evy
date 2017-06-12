@@ -180,6 +180,7 @@
         if (ee.debug) this.tick()
         var handlers = ee.events[name]
         if (!handlers) return this
+        handlers = slice.call(handlers, 0)
         for (var i = 0; i < handlers.length; i++) {
             var handler = handlers[i]
             var context = handler.context || ee._context || this
