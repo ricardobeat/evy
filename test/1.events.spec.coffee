@@ -84,6 +84,19 @@ defineSuite = (suiteName, options) ->
                 args.unshift 'testevent'
                 x.emit.apply x, args
 
+            # regression: 1db72bb
+            test 'emit with 4+ handlers and arguments', (done) ->
+                args = [0...10]
+                args.unshift 'testevent'
+                x = new EventEmitter(options)
+                x.count = 0
+                for l in [0...10]
+                    x.on 'testevent', (first) ->
+                        assert.equal first, 0
+                        assert.equal arguments.length, 10
+                        if ++@count is 10 then done()
+                x.emit.apply x, args
+
             if /async/.test suiteName
                 test 'emit before listen', (done) ->
                     x = new EventEmitter(options)
