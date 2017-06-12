@@ -192,7 +192,7 @@
                 case 3: fn.call(context, arguments[1], arguments[2]); break
                 default: // args optimization borrowed from node EventEmitter (lib/events.js)
                     var args = new Array(length - 1)
-                    for (i = 1; i < length; i++) args[i - 1] = arguments[i]
+                    for (var j = 1; j < length; j++) args[j - 1] = arguments[j]
                     fn.apply(context, args)
             }
         }
